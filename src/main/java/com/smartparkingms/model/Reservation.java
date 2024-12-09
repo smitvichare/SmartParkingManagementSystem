@@ -16,13 +16,17 @@ import java.time.LocalTime;
 public class Reservation {
     @Id
     private long id;
-    private long userId;
+
     private long slotId;
     private String vehicleNumber;
     private String vehicleType;
     private LocalTime startTime;
     private LocalTime endTime;
     private String status;
+    @ManyToOne
+    @JoinColumn(name = "users_id")
+    private User user;
+    private long userId;
 
 
 

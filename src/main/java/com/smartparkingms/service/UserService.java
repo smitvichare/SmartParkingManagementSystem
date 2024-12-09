@@ -1,6 +1,7 @@
 package com.smartparkingms.service;
 
 import com.smartparkingms.dto.UserReqDTO;
+import com.smartparkingms.dto.UserResp2;
 import com.smartparkingms.dto.UserRespDTO;
 import com.smartparkingms.model.User;
 
@@ -16,4 +17,6 @@ public interface UserService {
     UserRespDTO updateUser(long id,UserReqDTO userReqDTO);
 
     List<UserRespDTO> getAllUsers();
+
+    UserResp2 history(long id);
 }

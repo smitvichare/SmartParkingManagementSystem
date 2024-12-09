@@ -1,8 +1,8 @@
 package com.smartparkingms.controller;
 
 import com.smartparkingms.dto.UserReqDTO;
+import com.smartparkingms.dto.UserResp2;
 import com.smartparkingms.dto.UserRespDTO;
-import com.smartparkingms.model.User;
 import com.smartparkingms.service.UserService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +40,11 @@ public class UserController {
     @PutMapping("/{id}")
     public UserRespDTO updateUser(@PathVariable long id,@RequestBody UserReqDTO userReqDTO){
         return userService.updateUser(id,userReqDTO);
+    }
+
+    @GetMapping("/history/{id}")
+    public UserResp2 history(@PathVariable long id){
+        return userService.history(id);
     }
 
 

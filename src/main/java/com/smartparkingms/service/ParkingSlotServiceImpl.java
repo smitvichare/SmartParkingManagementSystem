@@ -76,6 +76,17 @@ public class ParkingSlotServiceImpl implements ParkingSlotService{
         return parkingRespDTO;
     }
 
+    public long giveParking(String vehicleType){
+
+        ParkingSlot parkingSlot=parkingSlotRepo.findAll().stream().filter(p-> p.isAvailable() && p.getVehicleType().equals(vehicleType)).findFirst().orElseThrow(()->new IDNotFoundException("No available slots."));
+        if(parkingSlot!=null){
+            parkingSlot.setAvailable(false);
+            parkingSlotRepo.save(parkingSlot);
+            return parkingSlot.getSlotNumber();
+        }
+        return 0;
+    }
+
 
 
 

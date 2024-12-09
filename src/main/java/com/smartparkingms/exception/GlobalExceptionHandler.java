@@ -14,4 +14,10 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
 
     }
+    @ExceptionHandler(PlateNotFoundException.class)
+    public ResponseEntity<String>handlePlateNotFoundException(IDNotFoundException e){
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+
+    }
+
 }

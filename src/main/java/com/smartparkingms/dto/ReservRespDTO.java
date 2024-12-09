@@ -1,5 +1,6 @@
 package com.smartparkingms.dto;
 
+import com.smartparkingms.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -20,4 +21,5 @@ public class ReservRespDTO {
     private LocalTime endTime;
     private String status;
     private String vehicleType;
+    private UserRespDTO user;
 }

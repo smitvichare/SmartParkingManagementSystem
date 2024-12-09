@@ -1,7 +1,9 @@
 package com.smartparkingms.service;
 
 import com.smartparkingms.dto.UserReqDTO;
+import com.smartparkingms.dto.UserResp2;
 import com.smartparkingms.dto.UserRespDTO;
+import com.smartparkingms.exception.IDNotFoundException;
 import com.smartparkingms.model.Reservation;
 import com.smartparkingms.model.User;
 import com.smartparkingms.repository.UserRepo;
@@ -24,7 +26,7 @@ public class UserServiceImpl implements UserService{
         return mapToDTO(userRepo.save(user));
     }
 
-    private UserRespDTO mapToDTO(User user) {
+    public UserRespDTO mapToDTO(User user) {
         UserRespDTO userRespDTO=new UserRespDTO();
         userRespDTO.setName(user.getName());
         userRespDTO.setEmail(user.getEmail());
@@ -64,5 +66,26 @@ public class UserServiceImpl implements UserService{
         List<User> users=userRepo.findAll();
 
         return users.stream().map(u->mapToDTO(u)).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserResp2 history(long id) {
+
+        return mapToDTO2(userRepo.findById(id).orElseThrow(()->new IDNotFoundException("ID not found,")));
+    }
+
+    private UserResp2 mapToDTO2(User user) {
+        UserResp2 userResp2=new UserResp2();
+        userResp2.setEmail(user.getEmail());
+        userResp2.setId(user.getId());
+        userResp2.setName(user.getName());
+        userResp2.setRegisteredVehicles(user.getRegisteredVehicles());
+        userResp2.setPhone(user.getPhone());
+        userResp2.setReservations(user.getReservations());
+        return userResp2;
+    }
+
+    public User getUser1(long id){
+        return userRepo.findById(id).orElseThrow(()->new IDNotFoundException("ID not found"));
     }
 }

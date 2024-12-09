@@ -24,6 +24,9 @@ public class User {
     @CollectionTable(name = "Vehicle_Data",joinColumns = @JoinColumn(name = "user_id"))
     private List<String> registeredVehicles;
 
+    @OneToMany(mappedBy = "user")
+    List<Reservation> reservations;
+
     public User(UserReqDTO userReqDTO){
         this.name= userReqDTO.getName();
         this.email=userReqDTO.getEmail();

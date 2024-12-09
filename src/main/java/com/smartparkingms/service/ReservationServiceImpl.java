@@ -3,17 +3,13 @@ package com.smartparkingms.service;
 import com.smartparkingms.dto.ReservReqDTO;
 import com.smartparkingms.dto.ReservRespDTO;
 import com.smartparkingms.exception.IDNotFoundException;
-import com.smartparkingms.model.Bill;
-import com.smartparkingms.model.ParkingSlot;
+import com.smartparkingms.exception.PlateNotFoundException;
 import com.smartparkingms.model.Reservation;
-import com.smartparkingms.repository.BillRepo;
-import com.smartparkingms.repository.ParkingSlotRepo;
+import com.smartparkingms.model.User;
 import com.smartparkingms.repository.ReservationRepo;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.stereotype.Service;
 
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -25,48 +21,29 @@ public class ReservationServiceImpl implements ReservationService{
     public ReservationRepo reservationRepo;
 
     @Autowired
-    public ParkingSlotRepo parkingSlotRepo;
-
-    @Autowired
-    public BillRepo billRepo;
+    public BillServiceImpl billService;
 
     @Autowired
     public ParkingSlotServiceImpl parkingSlotService;
 
+    @Autowired
+    public UserServiceImpl userService;
+
     @Override
     public ReservRespDTO addReservation(ReservReqDTO reservReqDTO) {
         Reservation reservation=new Reservation(reservReqDTO);
-        long parkId=giveParking(reservReqDTO.getVehicleType());
+        User user=userService.getUser1(reservation.getUserId());
+        reservation.setUser(user);
+        String r = reservation.getVehicleNumber();
+        String plate=user.getRegisteredVehicles().stream().filter(p-> Objects.equals(p, r)).findFirst().orElseThrow(()-> new PlateNotFoundException("Plates are not registered!"));
+        long parkId=parkingSlotService.giveParking(reservReqDTO.getVehicleType());
         reservation.setSlotId(parkId);
-        long duration = ChronoUnit.HOURS.between(reservation.getStartTime(), reservation.getEndTime());
-        int rate;
-        if(Objects.equals(reservation.getVehicleType(), "bike")){
-            rate=1;
-        } else if (Objects.equals(reservation.getVehicleType(), "car")) {
-            rate=3;
-        }
-        else if (Objects.equals(reservation.getVehicleType(), "truck")){
-            rate=5;
-        }
-        else {
-            throw new IDNotFoundException("Wrong Vehicle Type");
-        }
-        double amount=rate*duration;
-        Bill bill=new Bill();
-        bill.setReservationId(reservation.getId());
-        bill.setAmount(amount);
-        bill.setPaymentStatus("Unpaid");
-        billRepo.save(bill);
+        billService.createBill(reservation);
 
         return MapToDTO(reservationRepo.save(reservation));
     }
 
-//    public  double generateBill(long id){
-//        Reservation reservation=reservationRepo.findById(id).orElseThrow(()->new IDNotFoundException("ID not found"));
-//
-//        return amount;
-//
-//    }
+
     @Override
     public ReservRespDTO getReservation(long id) {
         return MapToDTO(reservationRepo.findById(id).orElseThrow(()->new IDNotFoundException("ID not Found")));
@@ -121,17 +98,9 @@ public class ReservationServiceImpl implements ReservationService{
         reservRespDTO.setEndTime(reservation.getEndTime());
         reservRespDTO.setUserId(reservation.getUserId());
         reservRespDTO.setVehicleType(reservation.getVehicleType());
+        reservRespDTO.setUser(userService.mapToDTO(reservation.getUser()));
         return reservRespDTO;
     }
 
-    public long giveParking(String vehicleType){
 
-        ParkingSlot parkingSlot=parkingSlotRepo.findAll().stream().filter(p-> p.isAvailable() && p.getVehicleType().equals(vehicleType)).findFirst().orElseThrow(()->new IDNotFoundException("No available slots."));
-        if(parkingSlot!=null){
-            parkingSlot.setAvailable(false);
-            parkingSlotRepo.save(parkingSlot);
-            return parkingSlot.getSlotNumber();
-        }
-        return 0;
-    }
 }
